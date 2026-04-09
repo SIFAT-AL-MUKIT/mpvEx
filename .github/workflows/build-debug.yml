@@ -1,7 +1,12 @@
 name: Build Release APK
 
+# ম্যানুয়ালি বিল্ড রান করার জন্য
 on:
   workflow_dispatch: 
+
+# গিটহাব রিলিজ তৈরি করার জন্য এই পারমিশনটি জরুরি
+permissions:
+  contents: write
 
 jobs:
   build:
@@ -22,11 +27,13 @@ jobs:
       run: chmod +x gradlew
 
     - name: Build Release APK
-      # assembleDebug এর জায়গায় assembleRelease দেওয়া হলো
       run: ./gradlew assembleRelease
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
+    - name: Create GitHub Release and Upload APKs
+      uses: softprops/action-gh-release@v1
       with:
-        name: mpvEx-Release-APKs
-        path: app/build/outputs/apk/**/*.apk
+        tag_name: Build-${{ github.run_number }}
+        name: mpvEx Custom Release Build ${{ github.run_number }}
+        files: app/build/outputs/apk/**/*.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
